@@ -1,6 +1,7 @@
 import {
   detectDecimalFormat,
   resolveDecimalFormat,
+  suggestHeaderMapping,
   type DecimalDetection,
 } from '@workspace/shared';
 
@@ -96,5 +97,128 @@ describe('resolveDecimalFormat', () => {
     expect(resolveDecimalFormat('eu', { format: 'us', confident: true })).toBe(
       'eu'
     );
+  });
+});
+
+// MFP Premium export headers, anonymized (no personal data — just the column
+// names and a couple of plausible values). These are the real-world case the
+// normalization + alias table exists to absorb: MFP ships "Protein (g)",
+// "Carbohydrates (g)", "Sodium (mg)", "Fiber", "Sugar", "Meal", "Date",
+// "Exercise" — none of which match the template headers by exact name.
+describe('suggestHeaderMapping', () => {
+  it('matches an MFP nutrition export to the food-diary headers', () => {
+    const required = [
+      'date',
+      'meal_type',
+      'calories',
+      'protein',
+      'carbs',
+      'fat',
+      'saturated_fat',
+      'sodium',
+      'dietary_fiber',
+      'sugars',
+      'vitamin_a',
+      'iron',
+    ];
+    const fileHeaders = [
+      'Date',
+      'Meal',
+      'Calories',
+      'Fat (g)',
+      'Saturated Fat',
+      'Sodium (mg)',
+      'Carbohydrates (g)',
+      'Fiber',
+      'Sugar',
+      'Protein (g)',
+      'Vitamin A',
+      'Iron',
+    ];
+    const mapping = suggestHeaderMapping(required, fileHeaders);
+    expect(mapping).toEqual({
+      date: 'Date',
+      meal_type: 'Meal',
+      calories: 'Calories',
+      protein: 'Protein (g)',
+      carbs: 'Carbohydrates (g)',
+      fat: 'Fat (g)',
+      saturated_fat: 'Saturated Fat',
+      sodium: 'Sodium (mg)',
+      dietary_fiber: 'Fiber',
+      sugars: 'Sugar',
+      vitamin_a: 'Vitamin A',
+      iron: 'Iron',
+    });
+  });
+
+  it('matches an MFP measurement export (date + weight, rest absent)', () => {
+    const required = ['date', 'weight', 'body_fat', 'height', 'waist', 'hips'];
+    const fileHeaders = ['Date', 'Weight'];
+    const mapping = suggestHeaderMapping(required, fileHeaders);
+    expect(mapping['date']).toBe('Date');
+    expect(mapping['weight']).toBe('Weight');
+    // MFP carries no body-comp columns — those stay unmapped, not guessed.
+    expect(mapping['body_fat']).toBeUndefined();
+    expect(mapping['height']).toBeUndefined();
+    expect(mapping['waist']).toBeUndefined();
+    expect(mapping['hips']).toBeUndefined();
+  });
+
+  it('matches an MFP exercise export (date + exercise name)', () => {
+    const required = [
+      'entry_date',
+      'exercise_name',
+      'exercise_force',
+      'exercise_level',
+      'exercise_mechanic',
+    ];
+    const fileHeaders = [
+      'Date',
+      'Exercise',
+      'Type',
+      'Exercise Calories',
+      'Exercise Minutes',
+      'Sets',
+      'Reps Per Set',
+      'Pounds',
+      'Steps',
+      'Note',
+    ];
+    const mapping = suggestHeaderMapping(required, fileHeaders);
+    expect(mapping['entry_date']).toBe('Date');
+    expect(mapping['exercise_name']).toBe('Exercise');
+    // "Type" is not a recognized alias for force/level/mechanic — left unmapped.
+    expect(mapping['exercise_force']).toBeUndefined();
+    expect(mapping['exercise_level']).toBeUndefined();
+    expect(mapping['exercise_mechanic']).toBeUndefined();
+  });
+
+  it('strips parenthetical units and punctuation so "Protein (g)" == "protein"', () => {
+    expect(suggestHeaderMapping(['protein'], ['Protein (g)'])['protein']).toBe(
+      'Protein (g)'
+    );
+    expect(suggestHeaderMapping(['sodium'], ['Sodium (mg)'])['sodium']).toBe(
+      'Sodium (mg)'
+    );
+  });
+
+  it('still matches exact/case-insensitive headers (regression: no alias needed)', () => {
+    expect(suggestHeaderMapping(['calories'], ['Calories'])['calories']).toBe(
+      'Calories'
+    );
+    expect(
+      suggestHeaderMapping(['saturated_fat'], ['Saturated Fat'])[
+        'saturated_fat'
+      ]
+    ).toBe('Saturated Fat');
+  });
+
+  it('leaves an unrecognized header unmapped rather than binding it wrong', () => {
+    const mapping = suggestHeaderMapping(
+      ['protein'],
+      ['Fruit (g)', 'Vegetables']
+    );
+    expect(mapping['protein']).toBeUndefined();
   });
 });

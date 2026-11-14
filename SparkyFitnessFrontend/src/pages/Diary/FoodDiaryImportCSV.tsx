@@ -36,6 +36,7 @@ import { usePreferences } from '@/contexts/PreferencesContext';
 import { useMealTypes } from '@/hooks/Diary/useMealTypes';
 import { useCustomNutrients } from '@/hooks/Foods/useCustomNutrients';
 import { useCsvFormat } from '@/hooks/useCsvFormat';
+import { matchDropdownValue } from '@/utils/dropdownMatch';
 import CsvFormatBar from '@/components/CsvImport/CsvFormatBar';
 import CsvFormatPreview from '@/components/CsvImport/CsvFormatPreview';
 import CsvImportResultPanel from '@/components/CsvImport/CsvImportResultPanel';
@@ -655,9 +656,13 @@ const FoodDiaryImportCSV = ({ onSave }: FoodDiaryImportCSVProps) => {
       );
     }
     if (header === 'meal_type') {
+      // Bind through matchDropdownValue so a CSV value whose case differs from
+      // the option list (e.g. "Lunch" vs "lunch") still highlights the right
+      // option; Radix matches by strict equality, so the raw value alone
+      // would show the placeholder. The server already matches case-insensitively.
       return (
         <Select
-          value={row[header] || ''}
+          value={matchDropdownValue(row[header], mealTypeOptions)}
           onValueChange={(value) => handleEditCell(row.id, header, value)}
         >
           <SelectTrigger className="w-full md:w-36">

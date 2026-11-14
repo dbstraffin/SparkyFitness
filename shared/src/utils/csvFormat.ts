@@ -186,14 +186,35 @@ export interface CsvImportOutcome<T = unknown> {
 // ── Header-mapping suggestion, shared by every importer's mapping dialog ───
 
 const normalizeHeader = (h: string): string =>
-  h.toLowerCase().replace(/[_ ]/g, '');
+  h
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, '') // strip parenthetical units: "Protein (g)" -> "Protein"
+    .replace(/[^a-z0-9]/g, ''); // strip whitespace + punctuation, keep letters+digits
+
+/**
+ * Known aliases for required headers, keyed by the normalized required header.
+ * Values are normalized alias forms. Covers vendor exports that name a field
+ * differently than the template (e.g. MFP "Carbohydrates" -> "carbs",
+ * "Fiber" -> "dietary_fiber", "Date" -> "entry_date"). Scoped per required
+ * header, so a file header that collides across importers (e.g. "Date") never
+ * cross-matches: it only matches whichever required header is present.
+ */
+const HEADER_ALIASES: Record<string, string[]> = {
+  entrydate: ['date'],
+  mealtype: ['meal'],
+  carbs: ['carbohydrates', 'carb'],
+  dietaryfiber: ['fiber'],
+  sugars: ['sugar'],
+  exercisename: ['exercise'],
+};
 
 /**
  * Best-effort initial guess at which file column corresponds to each
  * required header, for pre-filling a header-mapping dialog. Matches by
- * normalized name (case/underscore/space-insensitive) only — never guesses
- * from position or content, so an unmatched required header is left
- * unmapped rather than silently bound to the wrong column.
+ * normalized name (case/underscore/space/punctuation-insensitive, plus a
+ * per-field alias table) — never guesses from position or content, so an
+ * unmatched required header is left unmapped rather than silently bound to
+ * the wrong column.
  */
 export function suggestHeaderMapping(
   requiredHeaders: string[],
@@ -202,8 +223,11 @@ export function suggestHeaderMapping(
   const mapping: Record<string, string> = {};
   for (const required of requiredHeaders) {
     const normalizedRequired = normalizeHeader(required);
+    const aliases = HEADER_ALIASES[normalizedRequired] ?? [];
     const match = fileHeaders.find(
-      (h) => normalizeHeader(h) === normalizedRequired
+      (h) =>
+        normalizeHeader(h) === normalizedRequired ||
+        aliases.includes(normalizeHeader(h))
     );
     if (match) mapping[required] = match;
   }
