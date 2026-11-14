@@ -25,6 +25,7 @@ import ExerciseImportCSV, {
 } from '@/pages/Exercises/ExerciseImportCSV';
 import ExerciseEntryHistoryImportCSV from '@/pages/Exercises/ExerciseEntryHistoryImportCSV';
 import ExerciseImportFit from '@/pages/Exercises/ExerciseImportFit';
+import MyFitnessPalImport from '@/pages/Integrations/MyFitnessPalImport';
 import { useImportCsvMutation } from '@/hooks/Foods/useFoods';
 import { useImportFoodDiaryCsvMutation } from '@/hooks/Diary/useFoodEntries';
 import { useImportExercisesJsonMutation } from '@/hooks/Exercises/useExercises';
@@ -224,6 +225,20 @@ export const DataImportSettings = () => {
           )}
         >
           {() => <ExerciseImportFit />}
+        </ImportLauncher>
+
+        <ImportLauncher
+          icon={Utensils}
+          title={t(
+            'settings.dataImport.myfitnesspal.title',
+            'MyFitnessPal (ZIP)'
+          )}
+          description={t(
+            'settings.dataImport.myfitnesspal.description',
+            'Import a MyFitnessPal Premium export ZIP (nutrition, weight, and exercise history).'
+          )}
+        >
+          {(close) => <MyFitnessPalImport onClose={close} />}
         </ImportLauncher>
       </div>
     </div>

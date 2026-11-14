@@ -31,6 +31,7 @@ export * from './schemas/api/SupplementLabelScan.api.zod.ts';
 export * from './schemas/api/FoodPhotoLog.api.zod.ts';
 export * from './schemas/api/HealthMetricSamples.api.zod.ts';
 export * from './schemas/api/HeartRateZones.api.zod.ts';
+export * from './schemas/api/MyFitnessPalImport.api.zod.ts';
 export * from './schemas/api/OpenFoodFactsAutomaticSync.api.zod.ts';
 export * from './schemas/api/OpenFoodFactsContribution.api.zod.ts';
 export * from './schemas/api/Pagination.api.zod.ts';

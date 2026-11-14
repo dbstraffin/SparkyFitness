@@ -44,7 +44,8 @@ async function importExerciseEntriesFromCsv(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actingUserId: any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  entries: any
+  entries: any,
+  source = 'CSV_Import'
 ) {
   let createdCount = 0;
   const updatedCount = 0;
@@ -210,7 +211,7 @@ async function importExerciseEntriesFromCsv(
           exercise_preset_entry_id: workoutPresetId, // Link to preset if created/found
         },
         actingUserId,
-        'CSV_Import'
+        source
       ); // Add source and actingUserId
       // 6. Create Activity Details
       if (

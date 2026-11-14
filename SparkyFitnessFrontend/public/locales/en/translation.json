@@ -2763,6 +2763,10 @@
         "title": "Workout Activities (FIT)"
       },
       "importButton": "Import",
+      "myfitnesspal": {
+        "description": "Import a MyFitnessPal Premium export ZIP (nutrition, weight, and exercise history).",
+        "title": "MyFitnessPal (ZIP)"
+      },
       "title": "Data Import"
     },
     "developerResources": {
@@ -3217,6 +3221,29 @@
       "failedToDisableEmailMFA": "Failed to disable Email MFA",
       "copied": "Copied",
       "recoveryCodesCopiedToClipboard": "Recovery codes copied to clipboard."
+    },
+    "myfitnesspalImport": {
+      "title": "Import MyFitnessPal",
+      "subtitle": "Upload the ZIP from MyFitnessPal Premium > Export. The export is a summary, so it carries what it can carry.",
+      "limitations": "Nutrition is grouped by meal (no individual foods), weight has no unit, and exercise is a coarse per-activity summary.",
+      "selectFile": "Choose the export ZIP",
+      "fileSelected": "Selected: {{name}}",
+      "noFile": "No file selected.",
+      "weightUnit": "Weight unit",
+      "weightUnitHint": "The export carries no unit for weight, so tell us what your scale recorded.",
+      "domains": "What to import",
+      "domainNutrition": "Nutrition (food diary)",
+      "domainMeasurement": "Weight (check-in)",
+      "domainExercise": "Exercise history",
+      "import": "Import",
+      "importing": "Importing…",
+      "resultTitle": "Imported",
+      "imported": "{{count}} imported",
+      "skipped": "{{count}} skipped",
+      "failed": "{{count}} failed",
+      "notSelected": "not selected",
+      "success": "Import complete",
+      "error": "Import failed"
     },
     "nutrientDisplaySettings": {
       "failedToSavePreferences": "Failed to save {{view_group}} ({{platform}}) preferences: {{message}}",
@@ -8385,6 +8412,26 @@
     "imageBlockedFrom": "External image blocked: {{host}}",
     "imageFromHost": "image from {{host}}",
     "externalImage": "external image"
+  },
+  "myfitnesspalImport": {
+    "limitations": "This imports a MyFitnessPal Premium export. Nutrition is imported as one entry per meal (totals, not individual foods), weight in the unit you choose, and exercise as a single set per row. Re-importing the same file replaces the previously imported exercise entries.",
+    "selectFile": "Select ZIP file",
+    "fileSelected": "Selected: {{name}}",
+    "noFile": "No file selected",
+    "weightUnit": "Weight unit",
+    "weightUnitHint": "MyFitnessPal exports don't record a weight unit, so choose the one your scale used.",
+    "domains": "What to import",
+    "domainNutrition": "Nutrition (food diary)",
+    "domainMeasurement": "Weight (check-in measurements)",
+    "domainExercise": "Exercise (workout history)",
+    "import": "Import",
+    "importing": "Importing…",
+    "resultTitle": "Import results",
+    "notSelected": "Not selected",
+    "imported": "{{count}} imported",
+    "skipped": "{{count}} skipped",
+    "failed": "{{count}} failed",
+    "error": "Import failed"
   },
   "drink_presets": {
     "title": "Quick-Add Drink Presets",
