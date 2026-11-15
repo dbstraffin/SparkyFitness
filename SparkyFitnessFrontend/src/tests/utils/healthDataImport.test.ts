@@ -74,6 +74,96 @@ describe('mapRowsToHealthItems', () => {
       expect(errors).toHaveLength(1);
       expect(errors[0]!.error).toContain('weight unit');
     });
+
+    it('rejects a weight with no unit (and no override) instead of assuming kg', () => {
+      const { items, errors } = mapRowsToHealthItems('measurements', [
+        row({
+          date: '2026-01-02',
+          weight: '177',
+          weight_unit: '',
+          body_fat: '',
+          height: '',
+          neck: '',
+          waist: '',
+          hips: '',
+          length_unit: '',
+        }),
+      ]);
+      expect(items).toEqual([]);
+      expect(errors).toHaveLength(1);
+      expect(errors[0]!.error).toContain('no unit is set');
+    });
+
+    it('applies a weight unit override when the unit column is absent', () => {
+      const { items } = mapRowsToHealthItems(
+        'measurements',
+        [
+          row({
+            date: '2026-01-02',
+            weight: '177',
+            weight_unit: '',
+            body_fat: '',
+            height: '',
+            neck: '',
+            waist: '',
+            hips: '',
+            length_unit: '',
+          }),
+        ],
+        'auto',
+        { weightUnit: 'lb' }
+      );
+      const weight = items.find((i) => i.type === 'weight');
+      expect(weight?.value).toBeCloseTo(80.286, 2);
+      expect(weight?.unit).toBe('kg');
+    });
+
+    it('applies a length unit override when the unit column is absent', () => {
+      const { items } = mapRowsToHealthItems(
+        'measurements',
+        [
+          row({
+            date: '2026-01-02',
+            weight: '',
+            weight_unit: '',
+            body_fat: '',
+            height: '70',
+            neck: '',
+            waist: '',
+            hips: '',
+            length_unit: '',
+          }),
+        ],
+        'auto',
+        { lengthUnit: 'in' }
+      );
+      const height = items.find((i) => i.type === 'height');
+      expect(height?.value).toBeCloseTo(177.8, 1);
+      expect(height?.unit).toBe('cm');
+    });
+
+    it('lets a populated unit cell win over an override', () => {
+      const { items } = mapRowsToHealthItems(
+        'measurements',
+        [
+          row({
+            date: '2026-01-02',
+            weight: '73',
+            weight_unit: 'kg',
+            body_fat: '',
+            height: '',
+            neck: '',
+            waist: '',
+            hips: '',
+            length_unit: '',
+          }),
+        ],
+        'auto',
+        { weightUnit: 'lb' }
+      );
+      const weight = items.find((i) => i.type === 'weight');
+      expect(weight?.value).toBeCloseTo(73, 2);
+    });
   });
 
   // Issue #1960: a European export ("80,2") parsed as NaN and the row was
